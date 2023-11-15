@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"os"
 	"os/exec"
+	"strings"
 	"time"
 )
 
@@ -35,13 +36,18 @@ func scheduleExecutable(startTime, endTime, executablePath string) {
 	firstRun := true
 
 	for {
-		currentTime := time.Now().Format("15:04:05") //Формат даты, можно любое значение.
+		currentTime := time.Now().Format("15:04:05")
+
 		if currentTime >= startTime && currentTime <= endTime {
 			if firstRun {
 				fmt.Println("Program is running...")
 				firstRun = false
 			}
-			runExecutable(executablePath)
+
+			// Проверка, запущен ли процесс
+			if !processExists("AIMP.exe") {
+				runExecutable(executablePath)
+			}
 		} else if currentTime > endTime {
 			fmt.Println("Program is completed.")
 			endExecutable(executablePath)
@@ -69,4 +75,15 @@ func endExecutable(executablePath string) {
 		fmt.Println("Error:", err)
 		return
 	}
+}
+
+func processExists(processName string) bool {
+	cmd := exec.Command("tasklist")
+	output, err := cmd.Output()
+	if err != nil {
+		fmt.Println("Error:", err)
+		return false
+	}
+
+	return strings.Contains(string(output), processName)
 }
