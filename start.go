@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"os"
 	"os/exec"
+	"path/filepath"
 	"strings"
 	"time"
 )
@@ -35,22 +36,22 @@ func main() {
 func scheduleExecutable(startTime, endTime, executablePath string) {
 	firstRun := true
 
+	// Извлекаем название процесса из пути к файлу
+	processName := filepath.Base(executablePath)
+
 	for {
 		currentTime := time.Now().Format("15:04:05")
 
-		if currentTime >= startTime && currentTime <= endTime {
+		if currentTime >= startTime && currentTime <= endTime && !processExists(processName) {
 			if firstRun {
 				fmt.Println("Program is running...")
+				runExecutable(executablePath)
 				firstRun = false
 			}
 
-			// Проверка, запущен ли процесс
-			if !processExists("AIMP.exe") {
-				runExecutable(executablePath)
-			}
 		} else if currentTime > endTime {
 			fmt.Println("Program is completed.")
-			endExecutable(executablePath)
+			endExecutable(processName)
 			break
 		}
 		time.Sleep(1 * time.Second)
@@ -68,8 +69,8 @@ func runExecutable(executablePath string) {
 	}
 }
 
-func endExecutable(executablePath string) {
-	cmd := exec.Command("taskkill", "/F", "/IM", "AIMP.exe") // Вместо "AIMP.exe нужно использовать название процесса запущенного экзешника, либо путь к нему БЕЗ пробелов!"
+func endExecutable(processName string) {
+	cmd := exec.Command("taskkill", "/F", "/IM", processName)
 	err := cmd.Start()
 	if err != nil {
 		fmt.Println("Error:", err)
