@@ -1,6 +1,7 @@
 package main
 
 import (
+	"flag"
 	"fmt"
 	"os"
 	"os/exec"
@@ -8,12 +9,26 @@ import (
 )
 
 func main() {
-	// Установка времени запуска и завершения экзешника.
-	startTime := "16:11:00"
-	endTime := "16:11:10"
+	// Определение флагов для времени и пути.
+	var startTime string
+	var endTime string
+	var executablePath string
 
-	// Путь к экзеешнику.
-	scheduleExecutable(startTime, endTime, "C:/Program Files/AIMP/AIMP.exe")
+	// Установка значений флагов по умолчанию.
+	flag.StringVar(&startTime, "start", "16:00:00", "Время начала (в формате HH:MM:SS)")
+	flag.StringVar(&endTime, "end", "17:00:00", "Время окончания (в формате HH:MM:SS)")
+	flag.StringVar(&executablePath, "path", "", "Путь к файлу")
+
+	// Парсинг аргументов командной строки.
+	flag.Parse()
+
+	// Если путь к файлу не был указан, запросите у пользователя ввод пути к файлу.
+	if executablePath == "" {
+		fmt.Print("Введите путь к файлу: ")
+		fmt.Scanln(&executablePath)
+	}
+
+	scheduleExecutable(startTime, endTime, executablePath)
 }
 
 func scheduleExecutable(startTime, endTime, executablePath string) {
